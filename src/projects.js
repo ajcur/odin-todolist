@@ -1,4 +1,4 @@
-import ToDo from "./todo.js";
+import { ToDo } from "./todo.js";
 
 let projectList = [];
 
@@ -12,6 +12,9 @@ class Project {
     }
 
     addToDo(toDo) {
+        if (toDo._project !== undefined) {
+            toDo._project.removeToDo(toDo);
+        }
         this.toDos.push(toDo);
         toDo._project = this;
     }

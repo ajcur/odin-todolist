@@ -1,20 +1,24 @@
 import { format } from "../node_modules/date-fns";
 import { Project, defaultProject, projectList } from "./projects.js";
 
-export default class ToDo {
+let allToDos = [];
+class ToDo {
     constructor(
         title,
         description,
         dueDate,
-        priority = 2,
-        project = defaultProject
+        priority = "default"
+        /* project = defaultProject */
     ) {
+        this.id = crypto.randomUUID();
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;
         this.priority = priority;
-        this.project = project;
         this.complete = false;
+        this.project = defaultProject;
+        defaultProject.addToDo(this);
+        allToDos.push(this);
     }
 
     set dueDate(newDueDate) {
@@ -26,11 +30,13 @@ export default class ToDo {
     }
 
     set priority(newPriority) {
-        const acceptablePriorities = [1, 2, 3, 4];
+        const acceptablePriorities = ["low", "default", "high", "very high"];
         if (acceptablePriorities.includes(newPriority)) {
             this._priority = newPriority;
         } else {
-            console.log("Value must be a whole number between 1 to 4.");
+            console.log(
+                "Value must be one of 'low', 'default', 'high' or 'very high'."
+            );
         }
     }
 
@@ -38,7 +44,7 @@ export default class ToDo {
         return this._priority;
     }
 
-    set project(newProject) {
+    /*     set project(newProject) {
         if (projectList.includes(newProject)) {
             if (this._project !== undefined) {
                 this._project.removeToDo(this);
@@ -47,6 +53,10 @@ export default class ToDo {
         } else {
             console.log("This project does not exist.");
         }
+    } */
+
+    set project(newProject) {
+        this._project = newProject;
     }
 
     get project() {
@@ -65,3 +75,5 @@ export default class ToDo {
         return this._complete;
     }
 }
+
+export { allToDos, ToDo };
