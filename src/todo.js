@@ -3,13 +3,7 @@ import { Project, defaultProject, projectList } from "./projects.js";
 
 let allToDos = [];
 class ToDo {
-    constructor(
-        title,
-        description,
-        dueDate,
-        priority = "default"
-        /* project = defaultProject */
-    ) {
+    constructor(title, description, dueDate, priority = "default") {
         this.id = crypto.randomUUID();
         this.title = title;
         this.description = description;
@@ -44,17 +38,6 @@ class ToDo {
         return this._priority;
     }
 
-    /*     set project(newProject) {
-        if (projectList.includes(newProject)) {
-            if (this._project !== undefined) {
-                this._project.removeToDo(this);
-            }
-            this._project = newProject;
-        } else {
-            console.log("This project does not exist.");
-        }
-    } */
-
     set project(newProject) {
         this._project = newProject;
     }
@@ -73,6 +56,14 @@ class ToDo {
 
     get complete() {
         return this._complete;
+    }
+
+    deleteToDo() {
+        this._project.removeToDo(this);
+        let newAllToDos = allToDos.filter((item) => {
+            return item !== this;
+        });
+        allToDos = newAllToDos;
     }
 }
 

@@ -21,9 +21,23 @@ class Project {
 
     removeToDo(toDo) {
         let newToDos = this.toDos.filter((item) => {
-            return item != toDo;
+            return item !== toDo;
         });
         this.toDos = newToDos;
+    }
+
+    deleteProject() {
+        if (this === defaultProject) {
+            console.log("The default project cannot be deleted.");
+        } else {
+            for (let item of this.toDos) {
+                defaultProject.addToDo(item);
+            }
+            let newProjectList = projectList.filter((item) => {
+                return item !== this;
+            });
+            projectList = newProjectList;
+        }
     }
 }
 
