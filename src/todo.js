@@ -1,5 +1,6 @@
 import { format } from "../node_modules/date-fns";
 import { Project, defaultProject, projectList } from "./projects.js";
+import { ToDoDisplay } from "./tododisplay.js";
 
 let allToDos = [];
 class ToDo {
@@ -11,6 +12,7 @@ class ToDo {
         this.priority = priority;
         this.complete = false;
         this.project = defaultProject;
+        this.display = new ToDoDisplay(this);
         defaultProject.addToDo(this);
         allToDos.push(this);
     }

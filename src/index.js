@@ -3,8 +3,8 @@ import { defaultProject, Project, projectList } from "./projects.js";
 import { allToDos, ToDo } from "./todo.js";
 import { renderToDoDisplay } from "./displayToDo.js";
 
-renderToDoDisplay(new ToDo("To-Do 1", 0, new Date(2025, 10, 14)));
-renderToDoDisplay(new ToDo("toDo2", 0, new Date(), "high"));
+new ToDo("To-Do 1", 0, new Date(2025, 10, 14));
+new ToDo("toDo2", 0, new Date(), "high");
 new ToDo("toDo3", 0, new Date());
 
 new Project("project1", 0, 0);
