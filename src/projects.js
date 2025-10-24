@@ -16,7 +16,7 @@ class Project {
             toDo._project.removeToDo(toDo);
         }
         this.toDos.push(toDo);
-        toDo._project = this;
+        toDo.project = this;
     }
 
     removeToDo(toDo) {
@@ -42,7 +42,7 @@ class Project {
 }
 
 const defaultProject = new Project(
-    "default",
+    "Default",
     "These are to-dos that haven't been assigned to any other project!",
     "grey"
 );
