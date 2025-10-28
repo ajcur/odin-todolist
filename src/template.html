@@ -7,9 +7,19 @@
         <link rel="shortcut icon" href="#" />
     </head>
     <body>
-        <div id="content"></div>
-        <dialog id="edit-field-window">
-            <form method="dialog" id="edit-field-form"></form>
+        <header>
+            <h1>To-Do List</h1>
+            <button id="new-to-do-btn">New To-Do</button>
+            <button id="new-project-btn">New Project</button>
+        </header>
+        <div id="content">
+            <div id="project-list-display-area">
+                <button id="show-all-to-dos-btn">Show All To-Dos</button>
+            </div>
+            <div id="to-dos-display-area"></div>
+        </div>
+        <dialog id="popup-window">
+            <form method="dialog" id="popup-form"></form>
         </dialog>
     </body>
 </html>

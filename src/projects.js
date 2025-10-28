@@ -1,19 +1,19 @@
 import { ToDo } from "./todo.js";
-
-let projectList = [];
+import { app, allToDos, allProjects } from "./ui.js";
+import { ProjectDisplay } from "./projectsdisplay.js";
 
 class Project {
-    constructor(title, description, color) {
+    constructor(title, description) {
         this.title = title;
         this.description = description;
-        this.color = color;
+        this.display = new ProjectDisplay(this);
         this.toDos = [];
-        projectList.push(this);
+        allProjects.addProject(this);
     }
 
     addToDo(toDo) {
-        if (toDo._project !== undefined) {
-            toDo._project.removeToDo(toDo);
+        if (toDo.project !== undefined) {
+            toDo.project.removeToDo(toDo);
         }
         this.toDos.push(toDo);
         toDo.project = this;
@@ -33,10 +33,7 @@ class Project {
             for (let item of this.toDos) {
                 defaultProject.addToDo(item);
             }
-            let newProjectList = projectList.filter((item) => {
-                return item !== this;
-            });
-            projectList = newProjectList;
+            allProjects.removeProject(this);
         }
     }
 }
@@ -47,4 +44,4 @@ const defaultProject = new Project(
     "grey"
 );
 
-export { Project, projectList, defaultProject };
+export { Project, defaultProject };

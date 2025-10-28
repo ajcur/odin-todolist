@@ -1,26 +1,28 @@
 import "./styles.css";
-import { defaultProject, Project, projectList } from "./projects.js";
-import { allToDos, ToDo } from "./todo.js";
-import { renderToDoDisplay } from "./displayToDo.js";
+import { defaultProject, Project } from "./projects.js";
+import { ToDo } from "./todo.js";
+import { app, allToDos, allProjects, priorityList } from "./ui.js";
 
 new ToDo("To-Do 1", 0, new Date(2025, 10, 14));
-new ToDo("To-Do 2", 0, new Date(), "high");
-new ToDo("To-Do 3", 0, new Date());
+new ToDo("To-Do 2", 0, new Date(), priorityList[1]);
+new ToDo("To-Do 3", 0, new Date(), priorityList[3]);
 
 new Project("Project 1", 0, "white");
 new Project("Project 2", 0, "white");
 
-projectList[1].addToDo(allToDos[0]);
-/* project1.addToDo(toDo2);
-project2.addToDo(toDo3); */
+console.log(allProjects.getList()[1]);
 
-allToDos[1].deleteToDo();
-projectList[2].deleteProject();
+allProjects.getList()[1].addToDo(allToDos.getList()[0]);
+// /* project1.addToDo(toDo2);
+// project2.addToDo(toDo3); */
 
-/* console.log(defaultProject);
-console.log(project1);
-console.log(project2); */
+allToDos.getList()[1].deleteToDo();
+allProjects.getList()[2].deleteProject();
 
-console.log(allToDos);
+// /* console.log(defaultProject);
+// console.log(project1);
+// console.log(project2); */
 
-console.log(projectList);
+console.log(allToDos.getList());
+
+// console.log(allProjects.list);

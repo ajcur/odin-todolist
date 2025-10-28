@@ -1,20 +1,24 @@
 import { format } from "../node_modules/date-fns";
-import { Project, defaultProject, projectList } from "./projects.js";
+import { app, allToDos, allProjects, priorityList } from "./ui.js";
+import { Project, defaultProject } from "./projects.js";
 import { ToDoDisplay } from "./tododisplay.js";
-
-let allToDos = [];
 class ToDo {
-    constructor(title, description, dueDate, priority = "default") {
+    constructor(
+        title,
+        description,
+        dueDate = new Date(),
+        priority = priorityList[1],
+        project = defaultProject
+    ) {
         this.id = crypto.randomUUID();
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;
         this.priority = priority;
         this.complete = false;
-        this.project = defaultProject;
+        project.addToDo(this);
         this.display = new ToDoDisplay(this);
-        defaultProject.addToDo(this);
-        allToDos.push(this);
+        allToDos.addToDo(this);
     }
 
     #updateDisplay = function (property) {
@@ -51,14 +55,8 @@ class ToDo {
     }
 
     set priority(newPriority) {
-        const acceptablePriorities = ["low", "default", "high", "very high"];
-        if (acceptablePriorities.includes(newPriority)) {
-            this._priority = newPriority;
-        } else {
-            console.log(
-                "Value must be one of 'low', 'default', 'high' or 'very high'."
-            );
-        }
+        this._priority = newPriority;
+        this.#updateDisplay("priority");
     }
 
     get priority() {
@@ -67,6 +65,7 @@ class ToDo {
 
     set project(newProject) {
         this._project = newProject;
+        // newProject.addToDo(this);
         this.#updateDisplay("project");
     }
 
@@ -90,11 +89,8 @@ class ToDo {
     deleteToDo() {
         this.project.removeToDo(this);
         this.display.deleteDisplay();
-        let newAllToDos = allToDos.filter((item) => {
-            return item !== this;
-        });
-        allToDos = newAllToDos;
+        allToDos.removeToDo(this);
     }
 }
 
-export { allToDos, ToDo };
+export { ToDo, priorityList };

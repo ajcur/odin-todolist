@@ -1,11 +1,17 @@
-import { ToDo, allToDos } from "./todo";
+import { ToDo } from "./todo";
+import {
+    app,
+    createPopupWindow,
+    savePopupData,
+    getToDoProperties,
+    allToDos,
+    priorityList,
+    allProjects,
+    toDoProperties,
+    capitalize,
+} from "./ui.js";
 
-const contentBox = document.querySelector("#content");
-const editFieldWindow = document.querySelector("#edit-field-window");
-const editFieldForm = document.querySelector("#edit-field-form");
-// const newInput = document.querySelector("#new-value");
-// const newInputValueLabel = document.querySelector("#new-value-label");
-// const saveEditBtn = document.querySelector("#save-edit-button");
+const toDosDisplayArea = document.querySelector("#to-dos-display-area");
 
 class ToDoDisplay {
     constructor(toDo, viewType = "fullView", displayed = true) {
@@ -18,16 +24,19 @@ class ToDoDisplay {
             let titleEditBtn = document.createElement("button");
             let dueDateDisplay = document.createElement("p");
             let dueDateEditBtn = document.createElement("button");
+            let priorityDisplay = document.createElement("p");
+            let priorityEditBtn = document.createElement("button");
             let descriptionDisplay = document.createElement("p");
             let descriptionEditBtn = document.createElement("button");
-            let projectNameDisplay = document.createElement("p");
-            let projectNameEditBtn = document.createElement("button");
+            let projectDisplay = document.createElement("p");
+            let projectEditBtn = document.createElement("button");
 
             let editBtns = [
                 titleEditBtn,
                 dueDateEditBtn,
+                priorityEditBtn,
                 descriptionEditBtn,
-                projectNameEditBtn,
+                projectEditBtn,
             ];
 
             for (let editBtn of editBtns) {
@@ -36,13 +45,14 @@ class ToDoDisplay {
             }
 
             let completeStatusBox = document.createElement("div");
+            completeStatusBox.classList.add("status-box");
             let completeStatusDisplay = document.createElement("div");
             let markCompleteBtn = document.createElement("button");
 
             completeStatusBox.appendChild(completeStatusDisplay);
             completeStatusBox.appendChild(markCompleteBtn);
 
-            contentBox.appendChild(container);
+            // toDosDisplayArea.appendChild(container);
 
             return {
                 container,
@@ -50,10 +60,12 @@ class ToDoDisplay {
                 titleEditBtn,
                 dueDateDisplay,
                 dueDateEditBtn,
+                priorityDisplay,
+                priorityEditBtn,
                 descriptionDisplay,
                 descriptionEditBtn,
-                projectNameDisplay,
-                projectNameEditBtn,
+                projectDisplay,
+                projectEditBtn,
                 completeStatusBox,
                 completeStatusDisplay,
                 markCompleteBtn,
@@ -63,16 +75,17 @@ class ToDoDisplay {
         this.displayed = displayed;
         this.title = toDo.title;
         this.dueDate = toDo.dueDate;
+        this.priority = toDo.priority;
         this.description = toDo.description;
         this.project = toDo.project;
         this.complete = toDo.complete;
 
         this.#createBtnEvents();
+        this.renderDisplay();
     }
 
     set viewType(newViewType) {
         this._viewType = newViewType;
-        this.renderDisplay();
     }
 
     get viewType() {
@@ -80,10 +93,13 @@ class ToDoDisplay {
     }
 
     set displayed(newDisplayed) {
-        if (newDisplayed === true || newDisplayed === false) {
-            this._displayed = newDisplayed;
-        } else console.log("Value must be either true or false.");
-        this.renderDisplay();
+        let alreadyHidden = this.displayed === false;
+        if (newDisplayed === false && !alreadyHidden) {
+            toDosDisplayArea.removeChild(this.elements.container);
+        } else if (newDisplayed === true) {
+            this.renderDisplay();
+        }
+        this._displayed = newDisplayed;
     }
 
     get displayed() {
@@ -99,15 +115,6 @@ class ToDoDisplay {
         return this._title;
     }
 
-    set dueDate(newDueDate) {
-        this._dueDate = newDueDate;
-        this.elements.dueDateDisplay.textContent = this._dueDate;
-    }
-
-    get dueDate() {
-        return this._dueDate;
-    }
-
     set description(newDescription) {
         this._description = newDescription;
         this.elements.descriptionDisplay.textContent = this._description;
@@ -117,10 +124,30 @@ class ToDoDisplay {
         return this._description;
     }
 
+    set dueDate(newDueDate) {
+        this._dueDate = newDueDate;
+        this.elements.dueDateDisplay.textContent = `Due ${this._dueDate}`;
+    }
+
+    get dueDate() {
+        return this._dueDate;
+    }
+
+    set priority(newPriority) {
+        this._priority = newPriority;
+        this.elements.priorityDisplay.textContent = `${capitalize(
+            this.priority.title
+        )} Priority`;
+        this.elements.container.style.backgroundColor = this.priority.color;
+    }
+
+    get priority() {
+        return this._priority;
+    }
+
     set project(newProject) {
         this._project = newProject;
-        this.elements.projectNameDisplay.textContent = this._project.title;
-        this.elements.container.style.backgroundColor = this._project.color;
+        this.elements.projectDisplay.textContent = this.project.title;
     }
 
     get project() {
@@ -134,11 +161,13 @@ class ToDoDisplay {
         let markCompleteBtnText;
 
         if (this.complete === true) {
-            completeStatusText = "☑️";
+            completeStatusText = "☑";
             markCompleteBtnText = "Mark Incomplete";
+            this.elements.container.style.backgroundColor = "white";
         } else if (this.complete === false) {
-            completeStatusText = "❌";
+            completeStatusText = "☒";
             markCompleteBtnText = "Mark Complete";
+            this.priority = this.priority;
         } else completeStatusText = "Incorrect complete status received.";
 
         this.elements.completeStatusDisplay.textContent = completeStatusText;
@@ -149,95 +178,59 @@ class ToDoDisplay {
         return this._complete;
     }
 
-    #createEditDialog = function (property, type, defaultValue) {
-        let newValueInput;
-        let propertyCapitalized = (function () {
-            return property.charAt(0).toUpperCase() + property.slice(1);
-        })();
-        if (type === "textarea") {
-            newValueInput = document.createElement("textarea");
-        } else {
-            newValueInput = document.createElement("input");
-            newValueInput.setAttribute("type", type);
-        }
-        newValueInput.setAttribute("id", `new-${property}-input`);
-        newValueInput.setAttribute("value", defaultValue);
-        let newValueInputLabel = document.createElement("label");
-        newValueInputLabel.setAttribute("for", newValueInput.id);
-        newValueInputLabel.textContent = `${propertyCapitalized}: `;
-        let saveEditBtn = document.createElement("button");
-        saveEditBtn.textContent = "Save";
-
-        editFieldForm.appendChild(newValueInputLabel);
-        editFieldForm.appendChild(newValueInput);
-        editFieldForm.appendChild(saveEditBtn);
-
-        return {
-            newValueInput,
-            saveEditBtn,
-        };
-    };
-
-    #resetEditDialog = function () {
-        editFieldForm.replaceChildren();
-    };
-
-    #editPropValue = function (propertyName, newValue) {
+    #editPropValue(propertyName, newValue) {
         this.linkedToDo[propertyName] = newValue;
 
         console.log("Property was edited.");
-        console.log(allToDos);
-    };
+        console.log(allToDos.getList());
+    }
 
-    #createBtnEvents = function () {
-        let editableProperties = [
-            { name: "title", type: "text" },
-            { name: "dueDate", type: "date" },
-            {
-                name: "description",
-                type: "textarea",
-                default: this.description,
-            },
-        ];
-        let editDialog;
+    #createBtnEvents() {
+        let editWindow;
 
-        for (let property of editableProperties) {
+        let properties = getToDoProperties();
+        for (let property of properties) {
             this.elements[`${property.name}EditBtn`].addEventListener(
                 "click",
                 () => {
-                    property.defaultValue = this[property.name];
-                    editDialog = this.#createEditDialog(
-                        property.name,
-                        property.type,
-                        property.defaultValue
+                    editWindow = createPopupWindow(
+                        "toDo",
+                        "edit",
+                        property,
+                        this.linkedToDo
                     );
-                    editFieldWindow.showModal();
-                    editDialog.saveEditBtn.addEventListener("click", () => {
-                        let newValue = editDialog.newValueInput.value;
-                        if (newValue) {
-                            this.#editPropValue(property.name, newValue);
+
+                    editWindow.saveBtn.addEventListener("click", () => {
+                        savePopupData([property]);
+
+                        let updatedValue = property.value;
+                        if (updatedValue) {
+                            this.#editPropValue(property.name, updatedValue);
                         }
-                        this.#resetEditDialog();
-                        editFieldWindow.close();
                     });
                 }
             );
         }
 
         this.elements.markCompleteBtn.addEventListener("click", () => {
-            if (this.linkedToDo.complete === false) {
-                this.linkedToDo.complete === true;
-            } else if (this.linkedToDo.complete === true) {
-                this.linkedToDo.complete === false;
-            } else console.log("Incorrect complete status received.");
+            this.linkedToDo.complete =
+                this.linkedToDo.complete === false ? true : false;
         });
-    };
+
+        this.elements.container.addEventListener("click", (event) => {
+            if (event.target !== this.elements.container) {
+                return;
+            }
+            for (let otherToDo of allToDos.getList()) {
+                otherToDo.display.displayed = false;
+            }
+            this.viewType = "fullView";
+            this.renderDisplay();
+        });
+    }
 
     renderDisplay() {
         this.elements.container.replaceChildren();
-        if (this.displayed === false) {
-            return;
-        }
         let elementsToRender;
         if (this.viewType === "preview") {
             elementsToRender = [
@@ -253,8 +246,8 @@ class ToDoDisplay {
                 this.elements.dueDateEditBtn,
                 this.elements.descriptionDisplay,
                 this.elements.descriptionEditBtn,
-                this.elements.projectNameDisplay,
-                this.elements.projectNameEditBtn,
+                this.elements.projectDisplay,
+                this.elements.projectEditBtn,
                 this.elements.completeStatusBox,
             ];
         } else console.log("Preview or FullView must be selected.");
@@ -263,10 +256,23 @@ class ToDoDisplay {
             item.classList.add(`${this.viewType}-item`);
             this.elements.container.appendChild(item);
         });
+        toDosDisplayArea.appendChild(this.elements.container);
+        console.log(`Display rendered for ${this.title}`);
     }
+
+    // hideDisplay() {
+    //     let alreadyHidden = this.displayed === false;
+    //     this.displayed = false;
+    //     if (!alreadyHidden) {
+    //         toDosDisplayArea.removeChild(this.elements.container);
+    //     }
+    //     // if (this.elements.container.parent === toDosDisplayArea) {
+    //     // }
+    // }
 
     deleteDisplay() {
         this.elements.container.replaceChildren();
+        toDosDisplayArea.removeChild(this.elements.container);
         this.elements = {};
         this.linkedToDo = {};
     }
