@@ -86,6 +86,7 @@ class ToDoDisplay {
 
     set viewType(newViewType) {
         this._viewType = newViewType;
+        this.displayed = this.displayed;
     }
 
     get viewType() {
@@ -225,7 +226,7 @@ class ToDoDisplay {
                 otherToDo.display.displayed = false;
             }
             this.viewType = "fullView";
-            this.renderDisplay();
+            // this.renderDisplay();
         });
     }
 

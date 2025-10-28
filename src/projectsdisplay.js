@@ -26,12 +26,14 @@ class ProjectDisplay {
 
     displayToDos() {
         for (let toDo of this.linkedProject.toDos) {
+            toDo.display.viewType = "preview";
             toDo.display.displayed = true;
         }
     }
 
     hideToDos() {
         for (let toDo of this.linkedProject.toDos) {
+            toDo.display.viewType = "preview";
             toDo.display.displayed = false;
         }
     }
