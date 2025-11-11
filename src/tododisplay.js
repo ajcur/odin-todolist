@@ -12,9 +12,8 @@ import {
 } from "./ui.js";
 
 const toDosDisplayArea = document.querySelector("#to-dos-display-area");
-
 class ToDoDisplay {
-    constructor(toDo, viewType = "fullView", displayed = true) {
+    constructor(toDo) {
         this.linkedToDo = toDo;
         this.elements = (function () {
             let container = document.createElement("div");
@@ -71,22 +70,40 @@ class ToDoDisplay {
                 markCompleteBtn,
             };
         })();
-        this.viewType = viewType;
-        this.displayed = displayed;
-        this.title = toDo.title;
-        this.dueDate = toDo.dueDate;
-        this.priority = toDo.priority;
-        this.description = toDo.description;
-        this.project = toDo.project;
-        this.complete = toDo.complete;
+        this.viewType = "preview";
+        this.displayed = this.#checkInitialDisplayedStatus();
+        // this.title = toDo.title;
+        // this.dueDate = toDo.dueDate;
+        // this.priority = toDo.priority;
+        // this.description = toDo.description;
+        // this.project = toDo.project;
+        // this.complete = toDo.complete;
 
         this.#createBtnEvents();
-        this.renderDisplay();
+        this.#updateAllDisplays();
+        // this.renderDisplay();
+    }
+
+    #checkInitialDisplayedStatus() {
+        for (let toDo of allToDos.getList()) {
+            if (toDo.display.viewType === "fullView") {
+                return false;
+            }
+        }
+        for (let project of allProjects.getList()) {
+            if (
+                project.display.fullViewDisplayed === true &&
+                project != this.linkedToDo.project
+            ) {
+                return false;
+            }
+        }
+        return true;
     }
 
     set viewType(newViewType) {
         this._viewType = newViewType;
-        this.displayed = this.displayed;
+        // this.displayed = true;
     }
 
     get viewType() {
@@ -94,8 +111,9 @@ class ToDoDisplay {
     }
 
     set displayed(newDisplayed) {
-        let alreadyHidden = this.displayed === false;
-        if (newDisplayed === false && !alreadyHidden) {
+        let previouslyHidden =
+            this.displayed === false || this.displayed === undefined;
+        if (newDisplayed === false && !previouslyHidden) {
             toDosDisplayArea.removeChild(this.elements.container);
         } else if (newDisplayed === true) {
             this.renderDisplay();
@@ -107,77 +125,130 @@ class ToDoDisplay {
         return this._displayed;
     }
 
-    set title(newTitle) {
-        this._title = newTitle;
-        this.elements.titleDisplay.textContent = this._title;
+    #updateAllDisplays() {
+        this.updateTitleDisplay();
+        this.updateDescriptionDisplay();
+        this.updateDueDateDisplay();
+        this.updatePriorityDisplay();
+        this.updateProjectDisplay();
+        this.updateCompleteDisplay();
     }
 
-    get title() {
-        return this._title;
+    updateTitleDisplay() {
+        this.elements.titleDisplay.textContent = this.linkedToDo.title;
     }
 
-    set description(newDescription) {
-        this._description = newDescription;
-        this.elements.descriptionDisplay.textContent = this._description;
+    updateDescriptionDisplay() {
+        this.elements.descriptionDisplay.textContent =
+            this.linkedToDo.description;
     }
 
-    get description() {
-        return this._description;
+    updateDueDateDisplay() {
+        this.elements.dueDateDisplay.textContent = `Due ${this.linkedToDo.dueDate}`;
     }
 
-    set dueDate(newDueDate) {
-        this._dueDate = newDueDate;
-        this.elements.dueDateDisplay.textContent = `Due ${this._dueDate}`;
-    }
-
-    get dueDate() {
-        return this._dueDate;
-    }
-
-    set priority(newPriority) {
-        this._priority = newPriority;
+    updatePriorityDisplay() {
         this.elements.priorityDisplay.textContent = `${capitalize(
-            this.priority.title
+            this.linkedToDo.priority.title
         )} Priority`;
-        this.elements.container.style.backgroundColor = this.priority.color;
+        this.elements.container.style.backgroundColor =
+            this.linkedToDo.priority.color;
     }
 
-    get priority() {
-        return this._priority;
+    updateProjectDisplay() {
+        this.elements.projectDisplay.textContent =
+            this.linkedToDo.project.title;
     }
 
-    set project(newProject) {
-        this._project = newProject;
-        this.elements.projectDisplay.textContent = this.project.title;
-    }
-
-    get project() {
-        return this._project;
-    }
-
-    set complete(newComplete) {
-        this._complete = newComplete;
-
+    updateCompleteDisplay() {
         let completeStatusText;
         let markCompleteBtnText;
 
-        if (this.complete === true) {
+        if (this.linkedToDo.complete === true) {
             completeStatusText = "☑";
             markCompleteBtnText = "Mark Incomplete";
             this.elements.container.style.backgroundColor = "white";
-        } else if (this.complete === false) {
+        } else if (this.linkedToDo.complete === false) {
             completeStatusText = "☒";
             markCompleteBtnText = "Mark Complete";
-            this.priority = this.priority;
+            this.linkedToDo.priority = this.linkedToDo.priority;
         } else completeStatusText = "Incorrect complete status received.";
 
         this.elements.completeStatusDisplay.textContent = completeStatusText;
         this.elements.markCompleteBtn.textContent = markCompleteBtnText;
     }
 
-    get complete() {
-        return this._complete;
-    }
+    // set title(newTitle) {
+    //     this._title = newTitle;
+    //     this.elements.titleDisplay.textContent = this._title;
+    // }
+
+    // get title() {
+    //     return this._title;
+    // }
+
+    // set description(newDescription) {
+    //     this._description = newDescription;
+    //     this.elements.descriptionDisplay.textContent = this._description;
+    // }
+
+    // get description() {
+    //     return this._description;
+    // }
+
+    // set dueDate(newDueDate) {
+    //     this._dueDate = newDueDate;
+    //     this.elements.dueDateDisplay.textContent = `Due ${this._dueDate}`;
+    // }
+
+    // get dueDate() {
+    //     return this._dueDate;
+    // }
+
+    // set priority(newPriority) {
+    //     this._priority = newPriority;
+    //     this.elements.priorityDisplay.textContent = `${capitalize(
+    //         this.priority.title
+    //     )} Priority`;
+    //     this.elements.container.style.backgroundColor = this.priority.color;
+    // }
+
+    // get priority() {
+    //     return this._priority;
+    // }
+
+    // set project(newProject) {
+    //     this._project = newProject;
+    //     this.elements.projectDisplay.textContent = this.project.title;
+    // }
+
+    // get project() {
+    //     return this._project;
+    // }
+
+    // set complete(newComplete) {
+    //     this._complete = newComplete;
+
+    //     let completeStatusText;
+    //     let markCompleteBtnText;
+
+    //     if (this.complete === true) {
+    //         completeStatusText = "☑";
+    //         markCompleteBtnText = "Mark Incomplete";
+    //         this.elements.container.style.backgroundColor = "white";
+    //     } else if (this.complete === false) {
+    //         completeStatusText = "☒";
+    //         markCompleteBtnText = "Mark Complete";
+    //         this.priority = this.priority;
+    //     } else completeStatusText = "Incorrect complete status received.";
+
+    //     this.elements.completeStatusDisplay.textContent = completeStatusText;
+    //     this.elements.markCompleteBtn.textContent = markCompleteBtnText;
+    // }
+
+    // get complete() {
+    //     return this._complete;
+    // }
 
     #editPropValue(propertyName, newValue) {
         this.linkedToDo[propertyName] = newValue;
@@ -202,9 +273,7 @@ class ToDoDisplay {
                     );
 
                     editWindow.saveBtn.addEventListener("click", () => {
-                        savePopupData([property]);
-
-                        let updatedValue = property.value;
+                        let updatedValue = savePopupData([property])[0].value;
                         if (updatedValue) {
                             this.#editPropValue(property.name, updatedValue);
                         }
@@ -219,14 +288,17 @@ class ToDoDisplay {
         });
 
         this.elements.container.addEventListener("click", (event) => {
-            if (event.target !== this.elements.container) {
+            if (
+                event.target !== this.elements.container ||
+                this.viewType === "fullView"
+            ) {
                 return;
             }
             for (let otherToDo of allToDos.getList()) {
                 otherToDo.display.displayed = false;
             }
             this.viewType = "fullView";
-            // this.renderDisplay();
+            this.displayed = true;
         });
     }
 
@@ -258,7 +330,6 @@ class ToDoDisplay {
             this.elements.container.appendChild(item);
         });
         toDosDisplayArea.appendChild(this.elements.container);
-        console.log(`Display rendered for ${this.title}`);
     }
 
     // hideDisplay() {

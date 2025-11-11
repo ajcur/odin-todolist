@@ -1,5 +1,5 @@
 import { format } from "../node_modules/date-fns";
-import { app, allToDos, allProjects, priorityList } from "./ui.js";
+import { app, allToDos, allProjects, priorityList, capitalize } from "./ui.js";
 import { Project, defaultProject } from "./projects.js";
 import { ToDoDisplay } from "./tododisplay.js";
 class ToDo {
@@ -23,7 +23,9 @@ class ToDo {
 
     #updateDisplay = function (property) {
         if (this.display !== undefined) {
-            this.display[property] = this[property];
+            let propertyCapitalized = capitalize(property);
+            this.display[`update${propertyCapitalized}Display`]();
+            // this.display[property] = this[property];
         }
     };
 

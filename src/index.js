@@ -19,6 +19,8 @@ allProjects.getList()[1].addToDo(allToDos.getList()[0]);
 allToDos.getList()[1].deleteToDo();
 allProjects.getList()[2].deleteProject();
 
+console.log(allProjects.getList());
+
 // /* console.log(defaultProject);
 // console.log(project1);
 // console.log(project2); */

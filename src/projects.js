@@ -33,6 +33,7 @@ class Project {
             for (let item of this.toDos) {
                 defaultProject.addToDo(item);
             }
+            this.display.deleteDisplay();
             allProjects.removeProject(this);
         }
     }

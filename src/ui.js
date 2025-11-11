@@ -19,7 +19,6 @@ let allToDos = (function () {
             return item !== toDo;
         });
         list = newList;
-        console.log(list);
     };
     return { getList, addToDo, removeToDo };
 })();
@@ -33,7 +32,9 @@ let allProjects = (function () {
         list.push(project);
     };
     let removeProject = function (project) {
-        let newList = list.filter((item) => item !== project);
+        let newList = list.filter((item) => {
+            return item !== project;
+        });
         list = newList;
     };
     return { getList, addProject, removeProject };
@@ -125,10 +126,15 @@ const createPopupWindow = function (
         properties = getProjectProperties();
     }
 
-    if ((popupType = "edit")) {
+    if (popupType === "edit") {
+        if (propertyToEdit.name === "project") {
+            propertyToEdit.options = allProjects.getList();
+        }
         createPropertyField(propertyToEdit, popupType, itemToEdit);
-    } else if ((popupType = "createNew")) {
+    } else if (popupType === "createNew") {
+        console.log(properties);
         for (let property of properties) {
+            console.log(property);
             createPropertyField(property, popupType);
         }
         // let propertyCapitalized = capitalize(property.name);
@@ -189,7 +195,7 @@ const savePopupData = function (properties) {
     popupForm.replaceChildren();
     popupWindow.close();
 
-    return { properties };
+    return properties;
 };
 
 const createNewItem = function (itemType, properties) {
@@ -197,9 +203,15 @@ const createNewItem = function (itemType, properties) {
     let description = properties.find(
         (prop) => prop.name === "description"
     ).value;
-    let dueDate = properties.find((prop) => prop.name === "dueDate").value;
-    let priority = properties.find((prop) => prop.name === "priority").value;
-    let project = properties.find((prop) => prop.name === "project").value;
+    let dueDate;
+    let priority;
+    let project;
+
+    if (itemType === "toDo") {
+        dueDate = properties.find((prop) => prop.name === "dueDate").value;
+        priority = properties.find((prop) => prop.name === "priority").value;
+        project = properties.find((prop) => prop.name === "project").value;
+    }
 
     if (itemType === "toDo") {
         new ToDo(
@@ -221,7 +233,7 @@ const app = (function () {
     newToDoBtn.addEventListener("click", () => {
         let newPopupWindow = createPopupWindow("toDo", "createNew");
         newPopupWindow.saveBtn.addEventListener("click", () => {
-            properties = savePopupData(newPopupWindow.properties);
+            let properties = savePopupData(newPopupWindow.properties);
             createNewItem("toDo", properties);
         });
     });
@@ -230,24 +242,21 @@ const app = (function () {
     newProjectBtn.addEventListener("click", () => {
         let newPopupWindow = createPopupWindow("project", "createNew");
         newPopupWindow.saveBtn.addEventListener("click", () => {
-            properties = savePopupData("project", newPopupWindow.properties);
+            let properties = savePopupData(newPopupWindow.properties);
             createNewItem("project", properties);
         });
     });
 
     const allToDosBtn = document.querySelector("#show-all-to-dos-btn");
     allToDosBtn.addEventListener("click", () => {
+        for (let project of allProjects.getList()) {
+            project.display.fullViewDisplayed = false;
+        }
         for (let toDo of allToDos.getList()) {
             toDo.display.viewType = "preview";
             toDo.display.displayed = true;
         }
     });
-
-    for (let project in allProjects.getList()) {
-        project.display.goToButton.addEventListener("click", () => {
-            project.displayProject();
-        });
-    }
 })();
 
 export {
